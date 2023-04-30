@@ -101,7 +101,7 @@ void matchingFeatures(cv::Mat &imageLeft_t0, cv::Mat &imageRight_t0, cv::Mat &im
     // --------------------------------------------------------
     int bucket_size = std::min(imageLeft_t0.rows, imageLeft_t0.cols) / 10; // TODO PARAM
     int features_per_bucket = 1;                                           // TODO PARAM
-    std::cout << "number of features before bucketing: " << currentVOFeatures.points.size() << std::endl;
+    // std::cout << "number of features before bucketing: " << currentVOFeatures.points.size() << std::endl;
 
     // feature detector points before bucketing
     // displayPoints(imageLeft_t0,currentVOFeatures.points);
@@ -129,12 +129,12 @@ void matchingFeatures(cv::Mat &imageLeft_t0, cv::Mat &imageRight_t0, cv::Mat &im
     removeInvalidPoints(pointsRight_t0, status);
     removeInvalidPoints(pointsRight_t1, status);
 
-    std::cout << "number of features after bucketing: " << currentVOFeatures.points.size() << std::endl;
+    // std::cout << "number of features after bucketing: " << currentVOFeatures.points.size() << std::endl;
 
     // update current tracked points
     currentVOFeatures.points = pointsLeft_t1;
 
-    std::cout << "number of features after circular matching: " << currentVOFeatures.points.size() << std::endl;
+    // std::cout << "number of features after circular matching: " << currentVOFeatures.points.size() << std::endl;
 
     // feature detector points after circular matching
     // displayPoints(imageLeft_t0,currentVOFeatures.points);
@@ -268,8 +268,8 @@ void trackingFrame2Frame(cv::Mat &projMatrl, cv::Mat &projMatrr, std::vector<cv:
     // nonlinear optimization after, minimizing reprojection error
     // optimize_transformation(rvec,translation,points3D_t0,pointsLeft_t1,inliers, projMatrl);
     cv::Rodrigues(rvec, rotation);
-    std::cout << "[trackingFrame2Frame] inliers size: " << inliers.size() << " out of " << pointsLeft_t1.size()
-              << std::endl;
+    // std::cout << "[trackingFrame2Frame] inliers size: " << inliers.size() << " out of " << pointsLeft_t1.size()
+    //   << std::endl;
 }
 
 void displayPoints(cv::Mat &image, std::vector<cv::Point2f> &points)

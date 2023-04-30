@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_filters
   eigen_conversions
   tf_conversions
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventionsg

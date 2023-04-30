@@ -61,6 +61,8 @@ void integrateOdometryStereo(int frame_i, cv::Mat &frame_pose, const cv::Mat &ro
     cv::hconcat(rotation, translation_stereo, rigid_body_transformation);
     cv::vconcat(rigid_body_transformation, addup, rigid_body_transformation);
 
+    std::cout << "rigid_body_transformation: \n" << rigid_body_transformation << std::endl;
+
     // std::cout << "rigid_body_transformation" << rigid_body_transformation << std::endl;
 
     double scale = sqrt((translation_stereo.at<double>(0)) * (translation_stereo.at<double>(0)) +

@@ -46,4 +46,21 @@ void loadImageLeft(cv::Mat &image_color, cv::Mat &image_gary, int frame_id, std:
 
 void loadImageRight(cv::Mat &image_color, cv::Mat &image_gary, int frame_id, std::string filepath);
 
+std::ostream &operator<<(std::ostream &os, const cv::Mat_<double> &mat)
+{
+    for (int i = 0; i < mat.rows; ++i)
+    {
+        for (int j = 0; j < mat.cols; ++j)
+        {
+            os << mat(i, j);
+            if (j < mat.cols - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << std::endl;
+    }
+    return os;
+}
+
 #endif

@@ -2,6 +2,7 @@
 #include "sensor_msgs/Image.h"
 #include <cv_bridge/cv_bridge.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/synchronizer.h>
@@ -21,6 +22,8 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <mutex>
+#include <opencv2/core/eigen.hpp>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -29,12 +32,16 @@
 #include "utils.h"
 #include "visualOdometry.h"
 
+#define PI 3.14159
+
 class StereoVO
 {
   public:
     StereoVO(cv::Mat projMatrl_, cv::Mat projMatrr_, ros::NodeHandle nh);
 
     cv::Mat rosImage2CvMat(sensor_msgs::ImageConstPtr img);
+
+    void normalizeCvMat(cv::Mat &mat);
 
     // stereo pair callback
     void stereo_callback(const sensor_msgs::ImageConstPtr &image_left, const sensor_msgs::ImageConstPtr &image_right);
@@ -51,6 +58,9 @@ class StereoVO
     // 利用动捕进行位姿校正的时候的距离和角度阈值
     double dist_threshold;
     double angle_threshold;
+
+    bool mocap_adjust;
+    bool use_lab_mocap;
 
   private:
     int frame_id = 0;
@@ -84,6 +94,9 @@ class StereoVO
     nav_msgs::Path mocap_path;
     ros::Publisher mocap_path_pub;
 
+    // publish vo pose
+    ros::Publisher pose_pub;
+
     // mocap subscribtion
     ros::Subscriber mocap_sub;
 
@@ -93,5 +106,8 @@ class StereoVO
     Eigen::Isometry3d T_w_m;
     Eigen::Isometry3d T_m_b2_vio;
 
+    std::mutex m_mocap_update;
+
     bool first_mocap_pose_msg;
+    bool first_img_process;
 };

@@ -5,7 +5,12 @@ cx: 320.0
 cy: 240.0
 bf: -18.9
 # bf: -20.412
-display_track: 1      # 0: 不显示追踪图像 1:显示
-dist_threshold: 0.06  # 单位: m
-angle_threshold: 5    # 单位: 度
-
+display_track: 0      # 0: 不显示追踪图像 1:显示
+dist_threshold: 0.006  # 单位: m
+angle_threshold: 2    # 单位: 度
+mocap_adjust: 1       # 0: 不用动捕校正vo 1: 校正
+use_lab_mocap: 1      # 0: 使用比赛场地动捕10hz 1:使用实验室动捕60hz
+mocap_topic: "/mavros/vision_pose/pose"
+left_img_topic: "/camera/infra1/image_rect_raw"
+right_img_topic: "/camera/infra2/image_rect_raw"
+pub_pose_topic: "/stereo_vo/pose"
