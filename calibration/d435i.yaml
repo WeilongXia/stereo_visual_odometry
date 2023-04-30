@@ -1,0 +1,11 @@
+%YAML:1.0
+fx: 378.0
+fy: 378.0
+cx: 320.0
+cy: 240.0
+bf: -18.9
+# bf: -20.412
+display_track: 1      # 0: 不显示追踪图像 1:显示
+dist_threshold: 0.06  # 单位: m
+angle_threshold: 5    # 单位: 度
+

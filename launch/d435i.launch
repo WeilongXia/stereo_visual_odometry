@@ -1,0 +1,5 @@
+<launch>
+<node pkg="stereo_visual_odometry" type="stereo_vo_node" name="stereo_vo_node"  output="screen" /> 
+<!-- <param name="calib_yaml" type="str" value="$(find stereo_visual_odometry)/calibration/powerranger.yaml"/> -->
+<param name="calib_yaml" type="str" value="$(find stereo_visual_odometry)/calibration/d435i.yaml"/>
+</launch>
