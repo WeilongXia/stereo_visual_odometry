@@ -6,6 +6,12 @@ std::string mocap_topic;
 std::string left_img_topic;
 std::string right_img_topic;
 std::string pub_pose_topic;
+double t1;
+double t2;
+double t3;
+double t4;
+double t5;
+double t6;
 
 StereoVO::StereoVO(cv::Mat projMatrl_, cv::Mat projMatrr_, ros::NodeHandle nh)
 {
@@ -65,7 +71,8 @@ void StereoVO::mocap_callback(const geometry_msgs::PoseStampedConstPtr &mocap_ms
     }
 
     static ros::Time start_time = ros::Time::now();
-    if ((ros::Time::now() - start_time).toSec() > 60 && (ros::Time::now() - start_time).toSec() < 120)
+    double duration = (ros::Time::now() - start_time).toSec();
+    if ((duration > t1 && duration < t2) || (duration > t3 && duration < t4) || (duration > t5 && duration < t6))
     {
         return;
     }
@@ -398,6 +405,13 @@ int main(int argc, char **argv)
     fs["left_img_topic"] >> left_img_topic;
     fs["right_img_topic"] >> right_img_topic;
     fs["pub_pose_topic"] >> pub_pose_topic;
+
+    fs["t1"] >> t1;
+    fs["t2"] >> t2;
+    fs["t3"] >> t3;
+    fs["t4"] >> t4;
+    fs["t5"] >> t5;
+    fs["t6"] >> t6;
 
     cv::Mat projMatrl = (cv::Mat_<float>(3, 4) << fx, 0., cx, 0., 0., fy, cy, 0., 0, 0., 1., 0.);
     cv::Mat projMatrr = (cv::Mat_<float>(3, 4) << fx, 0., cx, bf, 0., fy, cy, 0., 0, 0., 1., 0.);
