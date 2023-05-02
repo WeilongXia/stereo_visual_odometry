@@ -12,6 +12,11 @@ double t3;
 double t4;
 double t5;
 double t6;
+double t7;
+double t8;
+double t9;
+double t10;
+bool test_mocap_lost;
 
 StereoVO::StereoVO(cv::Mat projMatrl_, cv::Mat projMatrr_, ros::NodeHandle nh)
 {
@@ -70,11 +75,15 @@ void StereoVO::mocap_callback(const geometry_msgs::PoseStampedConstPtr &mocap_ms
         }
     }
 
-    static ros::Time start_time = ros::Time::now();
-    double duration = (ros::Time::now() - start_time).toSec();
-    if ((duration > t1 && duration < t2) || (duration > t3 && duration < t4) || (duration > t5 && duration < t6))
+    if (test_mocap_lost)
     {
-        return;
+        static ros::Time start_time = ros::Time::now();
+        double duration = (ros::Time::now() - start_time).toSec();
+        if ((duration > t1 && duration < t2) || (duration > t3 && duration < t4) || (duration > t5 && duration < t6) ||
+            (duration > t7 && duration < t8) || (duration > t9 && duration < t10))
+        {
+            return;
+        }
     }
 
     if (first_mocap_pose_msg)
@@ -412,6 +421,12 @@ int main(int argc, char **argv)
     fs["t4"] >> t4;
     fs["t5"] >> t5;
     fs["t6"] >> t6;
+    fs["t7"] >> t7;
+    fs["t8"] >> t8;
+    fs["t9"] >> t9;
+    fs["t10"] >> t10;
+
+    fs["test_mocap_lost"] >> test_mocap_lost;
 
     cv::Mat projMatrl = (cv::Mat_<float>(3, 4) << fx, 0., cx, 0., 0., fy, cy, 0., 0, 0., 1., 0.);
     cv::Mat projMatrr = (cv::Mat_<float>(3, 4) << fx, 0., cx, bf, 0., fy, cy, 0., 0, 0., 1., 0.);
