@@ -28,9 +28,12 @@ StereoVO::StereoVO(cv::Mat projMatrl_, cv::Mat projMatrr_, ros::NodeHandle nh)
     pose_pub = nh.advertise<geometry_msgs::PoseStamped>(pub_pose_topic, 10);
 
     mocap_sub = nh.subscribe(mocap_topic, 10, &StereoVO::mocap_callback, this);
+    state_sub = nh.subscribe("/shieh_decision_fsm", 10, &StereoVO::state_callback, this);
 
     first_mocap_pose_msg = true;
     first_img_process = true;
+
+    state_val = 0;
 }
 
 cv::Mat StereoVO::rosImage2CvMat(sensor_msgs::ImageConstPtr img)
@@ -127,66 +130,15 @@ void StereoVO::mocap_callback(const geometry_msgs::PoseStampedConstPtr &mocap_ms
     {
         m_mocap_update.lock();
 
-        // Eigen::Isometry3d T_w_b1_mocap = T_w_m * T_m_b2 * T_b1_b2.inverse();
-        // Eigen::Isometry3d w_T_b1_vio = T_w_m * T_m_b2_vio * T_b1_b2.inverse();
-        // Eigen::Isometry3d err_pose = T_w_b1.inverse() * T_w_b1_mocap;
-        // std::cout << "T_w_b1_mocap translation: " << T_w_b1_mocap.translation().transpose() << std::endl;
-        // std::cout << "T_w_b1_mocap rotation: \n" << T_w_b1_mocap.linear() << std::endl;
-        // std::cout << "w_T_b1_vio translation: " << w_T_b1_vio.translation().transpose() << std::endl;
-        // std::cout << "w_T_b1_vio rotation: \n" << w_T_b1_vio.linear() << std::endl;
-        // std::cout << "T_w_b1 rotation: \n" << T_w_b1.linear() << std::endl;
-        // std::cout << "T_w_b1 translation: " << T_w_b1.translation().transpose() << std::endl;
-        // std::cout << "err_pose rotation: \n" << err_pose.linear() << std::endl;
-        // std::cout << "err_pose translation: " << err_pose.translation().transpose() << std::endl;
-        // std::cout << "T_b1_b2 rotation: \n" << T_b1_b2.linear() << std::endl;
-        // std::cout << "T_b1_b2 translation: " << T_b1_b2.translation().transpose() << std::endl;
-        // std::cout << "T_m_b2 rotation: \n" << T_m_b2.linear() << std::endl;
-        // std::cout << "T_m_b2 translation: " << T_m_b2.translation().transpose() << std::endl;
-        // std::cout << "T_w_m rotation: \n" << T_w_m.linear() << std::endl;
-        // std::cout << "T_w_m translation: " << T_w_m.translation().transpose() << std::endl;
-        // std::cout << "T_m_b2_vio rotation: \n" << T_m_b2_vio.linear() << std::endl;
-        // std::cout << "T_m_b2_vio translation: " << T_m_b2_vio.translation().transpose() << std::endl;
-
-        // 校正位置
-        // Eigen::Vector3d err_pos = T_w_b1_mocap.translation() - T_w_b1.translation();
-        // double err_dist = err_pos.norm();
-
-        // 校正姿态
-        // Eigen::Quaterniond err_rot(err_pose.linear());
-        // double err_angle = err_rot.vec().norm();
-
-        // if (err_dist >= dist_threshold || err_angle >= angle_threshold)
-        // {
-        // std::cout << "disr_err: " << err_dist << " "
-        //           << "angle_err: " << err_angle << std::endl;
-        // err_pos = err_pose.translation().normalized() * dist_threshold;
-        // err_pose.translation() = err_pos;
-        // cv::Mat err_pose_mat = cv::Mat::eye(4, 4, CV_64F);
-        // Eigen::Matrix4d err_pose_matrix = err_pose.matrix();
-        // cv::eigen2cv(err_pose_matrix, err_pose_mat);
-
-        // std::cout << "err_pose_matrix: \n" << err_pose_matrix << std::endl;
-
-        // std::cout << "frame_pose before: \n" << frame_pose << std::endl;
-        // normalizeCvMat(err_pose_mat);
-        // std::cout << "err_pose_mat: \n" << err_pose_mat << std::endl;
-        // cv::Mat pose = frame_pose * err_pose_mat;
-        // std::cout << "frame_pose before: \n" << pose << std::endl;
-        // frame_pose = frame_pose * err_pose_mat;
-        // normalizeCvMat(frame_pose);
-        // std::cout << "frame_pose after: \n" << frame_pose << std::endl;
-
-        //     std::cout << "mocap adjust !!!" << std::endl;
-        // }
-
         // 动捕测量值在vo的world系下坐标（body1 frame）
         Eigen::Isometry3d T_w_b1_mocap = T_w_m * T_m_b2 * T_b1_b2.inverse();
+
         Eigen::Isometry3d err_pose = T_w_b1_mocap * T_w_b1.inverse();
         Eigen::Vector3d err_pos = T_w_b1_mocap.translation() - T_w_b1.translation();
         Eigen::Matrix3d err_rot = err_pose.linear();
         Eigen::Quaterniond err_q(err_rot);
-        std::cout << "err_pos.norm(): " << err_pos.norm() << std::endl;
-        std::cout << "err_q.vec().norm(): " << err_q.vec().norm() * 180 / PI << std::endl;
+        // std::cout << "err_pos.norm(): " << err_pos.norm() << std::endl;
+        // std::cout << "err_q.vec().norm(): " << err_q.vec().norm() * 180 / PI << std::endl;
         if (err_pos.norm() >= dist_threshold)
         {
             err_pos = err_pos.normalized() * dist_threshold;
@@ -221,15 +173,29 @@ void StereoVO::mocap_callback(const geometry_msgs::PoseStampedConstPtr &mocap_ms
     mocap_pose_stamped.header.stamp = ros::Time::now();
     mocap_pose_stamped.header.frame_id = "map";
     tf::poseEigenToMsg(T_m_b2, mocap_pose_stamped.pose);
+    if (state_val > 1)
+    {
+        pose_pub.publish(mocap_pose_stamped);
+    }
     mocap_path.header.stamp = ros::Time::now();
     mocap_path.header.frame_id = "map";
     mocap_path.poses.push_back(mocap_pose_stamped);
     mocap_path_pub.publish(mocap_path);
 }
 
+void StereoVO::state_callback(const std_msgs::Int8 &state)
+{
+    state_val = state.data;
+}
+
 void StereoVO::stereo_callback(const sensor_msgs::ImageConstPtr &image_left,
                                const sensor_msgs::ImageConstPtr &image_right)
 {
+
+    if (state_val > 1)
+    {
+        return;
+    }
 
     if (!frame_id)
     {
@@ -245,7 +211,7 @@ void StereoVO::stereo_callback(const sensor_msgs::ImageConstPtr &image_left,
     // run the pipeline
     ros::Time start_time = ros::Time::now();
     run();
-    ROS_INFO("pipeline cost time: %f", (ros::Time::now() - start_time).toSec());
+    // ROS_INFO("pipeline cost time: %f", (ros::Time::now() - start_time).toSec());
 }
 
 void StereoVO::run()
@@ -299,8 +265,7 @@ void StereoVO::run()
     }
     else
     {
-
-        std::cout << "Too large rotation" << std::endl;
+        // std::cout << "Too large rotation" << std::endl;
     }
     t_b = clock();
     float frame_time = 1000 * (double)(t_b - t_a) / CLOCKS_PER_SEC;
@@ -309,7 +274,6 @@ void StereoVO::run()
     // cout << "[Info] FPS: " << fps << endl;
     cv::Mat xyz = frame_pose.col(3).clone();
     cv::Mat R = frame_pose(cv::Rect(0, 0, 3, 3));
-    std::cout << "R: \n" << R << std::endl;
 
     // benchmark times
     if (false)
@@ -331,8 +295,8 @@ void StereoVO::run()
         T_w_b1.linear() = rot;
         T_w_b1.translation() = pos;
 
-        std::cout << "T_w_b1 rotation(stereo callback): \n" << T_w_b1.linear() << std::endl;
-        std::cout << "T_w_b1 translation(stereo callback): " << T_w_b1.translation().transpose() << std::endl;
+        // std::cout << "T_w_b1 rotation(stereo callback): \n" << T_w_b1.linear() << std::endl;
+        // std::cout << "T_w_b1 translation(stereo callback): " << T_w_b1.translation().transpose() << std::endl;
 
         T_m_b2_vio = T_w_m.inverse() * T_w_b1 * T_b1_b2;
         Eigen::Matrix3d R_m_b2_vio = T_m_b2_vio.linear();

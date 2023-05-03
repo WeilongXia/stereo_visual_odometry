@@ -4,8 +4,7 @@ fy: 378.0
 cx: 320.0
 cy: 240.0
 bf: -18.9
-# bf: -20.412
-display_track: 1      # 0: 不显示追踪图像 1:显示
+display_track: 0      # 0: 不显示追踪图像 1:显示
 dist_threshold: 0.006  # 单位: m
 angle_threshold: 2    # 单位: 度
 mocap_adjust: 1       # 0: 不用动捕校正vo 1: 校正
@@ -13,7 +12,7 @@ use_lab_mocap: 0      # 0: 使用比赛场地动捕10hz 1:使用实验室动捕6
 mocap_topic: "/mavros/vision_pose/pose"
 left_img_topic: "/camera/infra1/image_rect_raw"
 right_img_topic: "/camera/infra2/image_rect_raw"
-pub_pose_topic: "/stereo_vo/pose"
+pub_pose_topic: "/mavros/vision_pose/pose"
 
 t1: 100.0
 t2: 105.0
@@ -26,4 +25,4 @@ t10: 135.0
 t5: 140.0
 t6: 145.0
 
-test_mocap_lost: 1   # 是否测试动捕丢失的情况 0: 不测试，比赛用 1: 测试，实验室用
+test_mocap_lost: 0   # 是否测试动捕丢失的情况 0: 不测试，比赛用 1: 测试，实验室用

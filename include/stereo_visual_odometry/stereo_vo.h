@@ -25,6 +25,7 @@
 #include <mutex>
 #include <opencv2/core/eigen.hpp>
 #include <sstream>
+#include <std_msgs/Int8.h>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,9 @@ class StereoVO
     // mocap data callback
     void mocap_callback(const geometry_msgs::PoseStampedConstPtr &mocap_msg);
 
+    // system state callback
+    void state_callback(const std_msgs::Int8 &state);
+
     // 是否显示跟踪图像
     bool display_track;
 
@@ -61,6 +65,9 @@ class StereoVO
 
     bool mocap_adjust;
     bool use_lab_mocap;
+
+    // 当前状态; 0: 初始化阶段 1: 穿树林 >1: 出树林
+    int state_val;
 
   private:
     int frame_id = 0;
@@ -99,6 +106,9 @@ class StereoVO
 
     // mocap subscribtion
     ros::Subscriber mocap_sub;
+
+    // state subscribtion
+    ros::Subscriber state_sub;
 
     Eigen::Isometry3d T_w_b1;
     Eigen::Isometry3d T_b1_b2;

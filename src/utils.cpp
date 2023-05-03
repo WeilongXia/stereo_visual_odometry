@@ -61,7 +61,7 @@ void integrateOdometryStereo(int frame_i, cv::Mat &frame_pose, const cv::Mat &ro
     cv::hconcat(rotation, translation_stereo, rigid_body_transformation);
     cv::vconcat(rigid_body_transformation, addup, rigid_body_transformation);
 
-    std::cout << "rigid_body_transformation: \n" << rigid_body_transformation << std::endl;
+    // std::cout << "rigid_body_transformation: \n" << rigid_body_transformation << std::endl;
 
     // std::cout << "rigid_body_transformation" << rigid_body_transformation << std::endl;
 
@@ -70,7 +70,7 @@ void integrateOdometryStereo(int frame_i, cv::Mat &frame_pose, const cv::Mat &ro
                         (translation_stereo.at<double>(2)) * (translation_stereo.at<double>(2)));
 
     // frame_pose = frame_pose * rigid_body_transformation;
-    std::cout << "scale: " << scale << std::endl;
+    // std::cout << "scale: " << scale << std::endl;
 
     rigid_body_transformation = rigid_body_transformation.inv();
     // if ((scale>0.1)&&(translation_stereo.at<double>(2) > translation_stereo.at<double>(0)) &&
@@ -84,7 +84,7 @@ void integrateOdometryStereo(int frame_i, cv::Mat &frame_pose, const cv::Mat &ro
     }
     else
     {
-        std::cout << "[WARNING] scale below 0.1, or incorrect translation" << std::endl;
+        // std::cout << "[WARNING] scale below 0.1, or incorrect translation" << std::endl;
     }
 }
 
